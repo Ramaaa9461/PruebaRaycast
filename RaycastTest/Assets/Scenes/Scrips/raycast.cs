@@ -5,14 +5,13 @@ using UnityEngine;
 public class raycast : MonoBehaviour
 {
 
-
+    [SerializeField] Camera cam;
     [Range(0, 1)] [SerializeField] float transparencia = 0;
-    [Range(0, 1)] [SerializeField] float transitionSpeed = 1;
 
     bool MR_active = false;
 
-    MeshRenderer[] TotalmeshRenderers;
-    RaycastHit[] TotalRaycastHits;
+    MeshRenderer[] TotalmeshRenderers;// = new MeshRenderer[];
+    RaycastHit[] TotalRaycastHits;//= new RaycastHit[1];
 
     private void Awake()
     {
@@ -20,44 +19,53 @@ public class raycast : MonoBehaviour
     }
     void Update()
     {
-        gradientRaycast();
+        // simpleRaycast();
+        // gradientRaycast();
 
-
+        multipleRaycasts();
     }
 
     void multipleRaycasts()
     {
 
         TotalRaycastHits = Physics.RaycastAll(transform.position, Vector3.up, 100f);
-
-        if (TotalRaycastHits.Length != 0)
+        if (TotalRaycastHits != null)
         {
-            for (int i = 0; i < TotalRaycastHits.Length; i++)
+            if (TotalRaycastHits.Length != 0)
             {
-                // TotalmeshRenderers[i] = TotalRaycastHits[i].transform.gameObject.GetComponent<MeshRenderer>();
-            }
+                for (int i = 0; i < TotalRaycastHits.Length; i++)
+                {
+                    if (TotalmeshRenderers != null)
+                    {
+                        TotalmeshRenderers[i] = TotalRaycastHits[i].transform.gameObject.GetComponent<MeshRenderer>();
+                    }
+                }
 
-            if (transparencia > 0)
-            {
+                if (transparencia > 0)
+                {
+                    transparencia -= Time.deltaTime;
+                }
 
-                transparencia -= Time.deltaTime;
+                if (TotalmeshRenderers != null)
+                {
+                    for (int i = 0; i < TotalmeshRenderers.Length; i++)
+                    {
+                        TotalmeshRenderers[i].material.color = new Color(TotalmeshRenderers[i].material.color.r, TotalmeshRenderers[i].material.color.g, TotalmeshRenderers[i].material.color.b, transparencia);
+                    }
+                }
             }
-            for (int i = 0; i < TotalmeshRenderers.Length; i++)
+            else
             {
-                TotalmeshRenderers[i].material.color = new Color(TotalmeshRenderers[i].material.color.r, TotalmeshRenderers[i].material.color.g, TotalmeshRenderers[i].material.color.b, transparencia);
-            }
-        }
-        else
-        {
-            if (transparencia < 1)
-            {
-                transparencia += Time.deltaTime / 2;
-            }
+                if (transparencia < 1)
+                {
+                    transparencia += Time.deltaTime / 2;
+                }
 
-            //for (int i = 0; i < TotalmeshRenderers.Length; i++)
-            //{
-            //    TotalmeshRenderers[i].material.color = new Color(TotalmeshRenderers[i].material.color.r, TotalmeshRenderers[i].material.color.g, TotalmeshRenderers[i].material.color.b, transparencia);
-            //}
+                //for (int i = 0; i < TotalmeshRenderers.Length; i++)
+                //{
+                //    TotalmeshRenderers[i].material.color = new Color(TotalmeshRenderers[i].material.color.r, TotalmeshRenderers[i].material.color.g, TotalmeshRenderers[i].material.color.b, transparencia);
+                //}
+            }
         }
 
     }
@@ -67,22 +75,22 @@ public class raycast : MonoBehaviour
     void simpleRaycast()
     {
 
-        if (Physics.Raycast(transform.position, Vector3.up, out hit, 100f))
+        if (Physics.Raycast(transform.position, Vector3.up, out hit, 100f) || Physics.Linecast(transform.position, cam.transform.position, out hit))
         {
 
             MR = hit.transform.gameObject.GetComponent<MeshRenderer>();
 
-            MR.gameObject.SetActive(true);
+            MR.enabled = false;
         }
         else
         {
-            MR.gameObject.SetActive(false);
+            MR.enabled = true;
 
         }
     }
     void gradientRaycast()
     {
-        if (Physics.Raycast(transform.position, Vector3.up, out hit, 100f))
+        if (Physics.Raycast(transform.position, Vector3.up, out hit, 100f) || Physics.Linecast(transform.position, cam.transform.position, out hit))
         {
             MR = hit.transform.gameObject.GetComponent<MeshRenderer>();
 
